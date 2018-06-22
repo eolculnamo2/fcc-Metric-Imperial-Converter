@@ -5,6 +5,7 @@ const helmet = require('helmet')
 const app = express()
 
 app.use(helmet())
+
 app.use(express.static('public'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
@@ -32,7 +33,7 @@ app.post('/convert',(req,res)=>{
 			break
 		}
 	}
-	if(arr[0].split('/') != undefined){
+	if(arr[0] != undefined){
 		if(arr[0].split('/').length == 2){
 			let a = arr[0].split('/')
 			arr[0] = a[0] / a[1]
@@ -40,17 +41,21 @@ app.post('/convert',(req,res)=>{
 	}
 
 	let newUnit = conversionTable[arr[1]];
-	if(newUnit == undefined && isNaN(Number(arr[0]))){
-		res.send({string: 'invalid number and unit'})
+
+	if(newUnit === undefined && isNaN(Number(arr[0])) && arr[1] != undefined){
+		return res.send({string: 'invalid number and unit'})
 	}
-	else if(newUnit == undefined){
-		res.send({string: 'Invalid Unit'})
+	else if(newUnit === undefined && arr[1] != undefined){
+		return res.send({string: 'Invalid Unit'})
 	}
 	else if(isNaN(Number(arr[0]))){
-		res.send({string: 'Invalid Number'})
+		return res.send({string: 'Invalid Number'})
 	}
 
-	let conversion = convert(arr[0]).from(arr[1]).to(newUnit);
+	let conversion = 0;
+	if(newUnit != undefined) {
+		conversion = convert(arr[0]).from(arr[1]).to(newUnit);
+	}
 
 	let payload ={
 		initNum: arr[0],
